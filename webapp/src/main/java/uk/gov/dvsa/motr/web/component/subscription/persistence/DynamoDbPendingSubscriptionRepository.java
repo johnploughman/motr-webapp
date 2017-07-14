@@ -34,6 +34,8 @@ import static uk.gov.dvsa.motr.web.system.SystemVariable.REGION;
 @Singleton
 public class DynamoDbPendingSubscriptionRepository implements PendingSubscriptionRepository {
 
+    private static final int MONTHS_TO_DELETION = 70;
+
     private DynamoDB dynamoDb;
     private String tableName;
 
@@ -89,7 +91,8 @@ public class DynamoDbPendingSubscriptionRepository implements PendingSubscriptio
                 .withString("mot_due_date", subscription.getMotDueDate().format(DateTimeFormatter.ISO_LOCAL_DATE))
                 .withString("mot_due_date_md", subscription.getMotDueDate().format(DateTimeFormatter.ofPattern("MM-dd")))
                 .withString("mot_test_number", subscription.getMotTestNumber())
-                .withString("created_at", ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT));
+                .withString("created_at", ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT))
+                .withNumber("deletion_date", ZonedDateTime.now().plusMonths(MONTHS_TO_DELETION).toEpochSecond());
 
         dynamoDb.getTable(tableName).putItem(item);
     }
